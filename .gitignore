@@ -5,3 +5,7 @@
 !src/
 !src/**
 !.gitignore
+
+# Ignore all "__pycache__" folders and their contents
+__pycache__/
+**/__pycache__/
