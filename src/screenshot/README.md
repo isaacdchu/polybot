@@ -9,4 +9,3 @@ take_screenshot(name: str)
         - The name of the file to be stored. Will overwrite if name is already taken
 - Return:
     - A PIL Image object of the screenshot taken
-    - 
