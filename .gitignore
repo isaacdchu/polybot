@@ -1,1 +1,7 @@
-src/data
+# Ignore everything
+*
+
+# Except the "src" directory
+!src/
+!src/**
+!.gitignore

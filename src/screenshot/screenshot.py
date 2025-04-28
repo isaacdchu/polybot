@@ -8,6 +8,23 @@ from Quartz import (
     CGImageGetBytesPerRow
 )
 
+def take_screenshot(name: str) -> Image:
+    """
+    - Description:
+    - Takes a screenshot of the game's window (2048px x 1534px)
+    - Stores the file in `src/screenshot/data/name.png`
+    - Parameters:
+        - name: str
+            - The name of the file to be stored. Will overwrite if name is already taken
+    - Return:
+        - A PIL Image object of the screenshot taken
+    """
+    img = capture_window("Polytopia")
+    box = (0, 134, 2048, 1668)
+    img = img.crop(box=box)
+    img.save(os.path.join("data", f"{name}.png"))
+    return img
+
 def get_window_id(title):
     window_list = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID)
     for window in window_list:
@@ -42,17 +59,3 @@ def capture_window(window_id):
         1  # orientation
     )
     return img
-
-# Usage
-title = 'Polytopia'
-window_id = get_window_id(title)
-if window_id:
-    img = capture_window(window_id)
-    if img:
-        box = (0, 134, 2048, 1668)
-        img = img.crop(box=box)
-        img.save(os.path.join("data", "ss.png"))
-    else:
-        print('Failed to capture window.')
-else:
-    print('Window not found.')
