@@ -3,3 +3,4 @@
 
 # Except the "src" directory
 !src/**
+!.gitignore
