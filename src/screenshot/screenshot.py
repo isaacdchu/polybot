@@ -49,6 +49,8 @@ window_id = get_window_id(title)
 if window_id:
     img = capture_window(window_id)
     if img:
+        box = (0, 134, 2048, 1668)
+        img = img.crop(box=box)
         img.save(os.path.join("data", "ss.png"))
     else:
         print('Failed to capture window.')
