@@ -1,2 +1,3 @@
 Pillow
 pyobjc
+pyautogui
