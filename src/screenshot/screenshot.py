@@ -11,7 +11,7 @@ from Quartz import (
 def take_screenshot(name: str) -> Image:
     """
     - Description:
-    - Takes a screenshot of the game's window (2048px x 1534px)
+    - Takes a screenshot of the game's window (3024px x 1692px)
     - Stores the file in `src/screenshot/data/name.png`
     - Parameters:
         - name: str
@@ -20,7 +20,7 @@ def take_screenshot(name: str) -> Image:
         - A PIL Image object of the screenshot taken
     """
     img = capture_window(get_window_id("Polytopia"))
-    box = (0, 134, 2048, 1668)
+    box = (0, 132, 3024, 1824)
     img = img.crop(box=box)
     img.save(os.path.join("data", f"{name}.png"))
     return img
