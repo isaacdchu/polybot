@@ -9,3 +9,6 @@
 # Ignore all "__pycache__" folders and their contents
 __pycache__/
 **/__pycache__/
+
+# Ignore the contents of the "src/data" directory
+src/data/**
