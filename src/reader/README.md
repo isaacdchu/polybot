@@ -15,6 +15,6 @@ read_screenshot(img: Image, type: str)
     - img: Image
         - The Image object to read
     - type: str
-        - The type of screenshot (start_turn, tech_tree, etc.)
+        - The type of screenshot (game, tech, info, etc.)
 - Return:
     - A JSON file of data 
