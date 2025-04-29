@@ -43,6 +43,3 @@ def interpolate_drag(t: float) -> float:
     if (t > 0.5):
         return 1
     return 4 * (t ** 2)
-
-# Example usage
-center_camera()

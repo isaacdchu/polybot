@@ -1,5 +1,7 @@
 import os
-import screenshot.screenshot as ss
+import screenshot.screenshot as screenshot
 import reader.reader as reader
+import camera.camera as camera
 
-ss.take_screenshot("ss")
+camera.center_camera()
+screenshot.take_screenshot("ss")
