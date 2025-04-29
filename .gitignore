@@ -12,3 +12,4 @@ __pycache__/
 
 # Ignore the contents of the "src/data" directory
 src/data/**
+!src/data/
