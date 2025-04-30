@@ -6,6 +6,7 @@ from PIL import ImageFilter
 from PIL import ImageEnhance
 
 # camera.center_camera()
+camera.tech_tree_camera()
 img = screenshot.take_screenshot("ss")
 print(reader.get_screenshot_text(img))
 print(reader.get_screenshot_type(img))

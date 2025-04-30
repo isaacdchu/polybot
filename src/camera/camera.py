@@ -4,8 +4,8 @@ import time
 
 def center_camera():
     focus_application("Polytopia")
-    pyautogui.press("3")
-    pyautogui.press("3")
+    pyautogui.press("2")
+    pyautogui.press("2")
     (screen_width, screen_height) = pyautogui.size()
     move_cursor_to_top_right_corner()
     pyautogui.dragTo(0 + 10, 900 - 10, duration=0.15, button="left")
@@ -14,6 +14,12 @@ def center_camera():
     pyautogui.press("3")
     pyautogui.dragTo(screen_width // 2, screen_height // 2, duration=1, button="left", tween=interpolate_drag)
     time.sleep(0.05)
+
+def tech_tree_camera():
+    focus_application("Polytopia")
+    pyautogui.press("2")
+    pyautogui.press("3")
+    pyautogui.moveTo(300, 790)
 
 def focus_application(app_name):
     try:
