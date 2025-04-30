@@ -5,7 +5,8 @@ import camera.camera as camera
 from PIL import ImageFilter
 from PIL import ImageEnhance
 
-camera.center_camera()
+# camera.center_camera()
 img = screenshot.take_screenshot("ss")
 print(reader.get_screenshot_text(img))
 print(reader.get_screenshot_type(img))
+reader.read_screenshot(img, "tech")

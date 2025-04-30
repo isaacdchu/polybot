@@ -2,3 +2,4 @@ Pillow
 pyobjc
 pyautogui
 pytesseract
+numpy
