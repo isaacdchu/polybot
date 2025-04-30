@@ -37,17 +37,42 @@ def read_tech(img: Image) -> None:
         r = 60
         return (center[0] - r, center[1] -r, center[0] + r, center[1] + r)
     centers = [
-        (1583, 686),
+        # Tier 1: Riding -> Hunting
+        (1582, 685),
         (1697, 849),
         (1579, 1009),
         (1388, 944),
         (1391, 741),
-        (1533, 522)
+
+        # Tier 2: Roads -> Forestry
+        (1533, 522),
+        (1721, 587),
+        (1836, 752),
+        (1833, 952),
+        (1712, 1114),
+        (1520, 1171),
+        (1330, 1106),
+        (1216, 941),
+        (1220, 741),
+        (1340, 580),
+
+        #Tier 3: Trade -> Mathematics
+        (1481, 359),
+        (1861, 490),
+        (1976, 654),
+        (1968, 1055),
+        (1848, 1215),
+        (1465, 1332),
+        (1273, 1266),
+        (1045, 938),
+        (1048, 738),
+        (1290, 418)
     ]
     has_tech_color = (130, 207, 113)
     for i, center in enumerate(centers):
         box = make_box(center)
         cropped_img = img.crop(box=box)
+        # TODO need more preprocessing before converting to string
         text = pytesseract.image_to_string(cropped_img)
         has_tech = contains_color(cropped_img, target_rgb=has_tech_color, tolerance=20)
         # if (has_tech == True):
