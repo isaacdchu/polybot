@@ -18,7 +18,6 @@ def get_screenshot_type(img: Image) -> str:
 def read_screenshot(img: Image, type: str) -> None:
     if (type == "tech"):
         read_tech(img)
-        return
 
 
 def get_screenshot_text(img: Image) -> str:
@@ -33,9 +32,14 @@ def contains_color(img: Image, target_rgb=tuple[int, int, int], tolerance=20):
     return np.any(diff <= tolerance)
 
 def read_tech(img: Image) -> None:
-    def make_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
+    def make_full_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
         r = 60
-        return (center[0] - r, center[1] -r, center[0] + r, center[1] + r)
+        return (center[0] - r, center[1] - r, center[0] + r, center[1] + r)
+    def make_text_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
+        w = 50
+        h1 = 15
+        h2 = 55
+        return (center[0] - w, center[1] - h1, center[0] + w, center[1] + h2)
     centers = [
         # Tier 1: Riding -> Hunting
         (1582, 685),
@@ -70,14 +74,15 @@ def read_tech(img: Image) -> None:
     ]
     has_tech_color = (130, 207, 113)
     for i, center in enumerate(centers):
-        box = make_box(center)
+        box = make_text_box(center)
         cropped_img = img.crop(box=box)
         # TODO need more preprocessing before converting to string
         text = pytesseract.image_to_string(cropped_img)
+        text = text.replace("\n", "")
         has_tech = contains_color(cropped_img, target_rgb=has_tech_color, tolerance=20)
         # if (has_tech == True):
             # add to tech upgraded
 
         # TODO else: check for blue for available upgrade, then if no blue, add to locked tech
         cropped_img.save(f"data/node_{i}.png")
-        print(text)
+        print(f"node: {i:02d} | {text}")
