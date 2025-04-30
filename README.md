@@ -1,5 +1,5 @@
 # Polybot
-An AI bot that plays polytopia (on mac)
+An AI bot that plays polytopia (steam version on mac)
 
 ## Settings
 Suggestions: OFF
