@@ -11,13 +11,13 @@ tess_path = "/opt/homebrew/Cellar/tesseract/5.5.0_1/share/tessdata"
 
 # camera.center_camera()
 camera.tech_tree_camera()
-img = screenshot.take_screenshot("data/images/ss.png")
+img = screenshot.take_screenshot("data/images/tech_tree/ss.png")
 print(reader.get_screenshot_text(img))
 print(reader.get_screenshot_type(img))
 reader.read_screenshot(img, "tech")
 
 camera.tech_info_camera("navigation")
-img = screenshot.take_screenshot("data/images/tt.png")
+img = screenshot.take_screenshot("data/images/tech_tree/tt.png")
 
 # img = Image.open("data/img10.png")
 # with tesserocr.PyTessBaseAPI(path=tess_path, psm=10, oem=3) as api:

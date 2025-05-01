@@ -50,27 +50,29 @@ def contains_color(img: Image, target_rgb=tuple[int, int, int], tolerance=20):
 def read_tech(img: Image) -> dict:
     def calc_tech_cost(k: list[dict]) -> list[dict]:
         # cost of tech = (tier * cities + 4)
-        # literacy = ceil(cost / 3)
-        def find_num_cities(has_literacy: bool, k: list[dict]) -> int:
-            city_data = []
-            for i, item in enumerate(k):
-                if (item["cost"] > 0):
-                    cost = (item["cost"] - 4) / get_tech_tier(i)
-                    if (has_literacy == True):
-                        cost = ceil(cost / 3)
-                    city_data.append(int(cost))
-            most_common = max(set(city_data), key=city_data.count)
-            return most_common
+        # literacy = ceil(2 * cost / 3)
+        def find_num_cities(has_literacy: bool) -> int:
+            with tesserocr.PyTessBaseAPI(path=tess_path, psm=10, oem=3) as api:
+                box = (1679, 684, 1734, 708)
+                img = Image.open("data/images/tech_tree/tt.png").crop(box=box).convert("RGB")
+                api.SetVariable("tessedit_char_whitelist", "0123456789")
+                api.SetImage(img)
+                tier_3_cost = int(api.GetUTF8Text().replace("\n", "").strip())
+            if (has_literacy == True):
+                num_cities = (1.5 * tier_3_cost - 4) // 3
+            else:
+                num_cities = (tier_3_cost - 4) // 3
+            return int(num_cities)
 
         has_literacy = False
         if (k[20]["status"] == "owned"):
             has_literacy = True
 
-        num_cities = find_num_cities(has_literacy, k)
+        num_cities = find_num_cities(has_literacy)
         for i in range(len(k)):
             cost = get_tech_tier(i) * num_cities + 4
             if (has_literacy == True):
-                cost = ceil(cost / 3)
+                cost = ceil(2 * cost / 3)
             k[i]["cost"] = cost
         return k
 
@@ -87,60 +89,8 @@ def read_tech(img: Image) -> dict:
         if (index <= 14):
             return 2
         return 3
-    
-    def get_tech_cost(img: Image, counter: int) -> int:
-        def filter_for_red(img: Image) -> Image:
-            img = img.convert("RGB")
-            data = np.array(img)
-            mask = (data[..., 0] >= 110) & (data[..., 1] < 110) & (data[..., 2] < 110)
-            data[mask] = [0, 0, 0]  # Black
-            data[~mask] = [255, 255, 255]  # White
-            return Image.fromarray(data)
-        
-        def filter_for_white(img: Image) -> Image:
-            img = img.convert("RGB")
-            data = np.array(img)
-            mask = (data[..., 0] > 150) & (data[..., 1] > 160) & (data[..., 2] > 170)
-            data[mask] = [0, 0, 0]  # Black
-            data[~mask] = [255, 255, 255]  # White
-            return Image.fromarray(data)
-        
-        def upscale_image(img: Image) -> Image:
-            arr = np.array(img)
-            # Upscale: 3x by repeating pixels
-            scale_factor = 3
-            upscaled_arr = arr.repeat(scale_factor, axis=0).repeat(scale_factor, axis=1)
-            upscaled_img = Image.fromarray(upscaled_arr)
 
-            # Apply slight Gaussian blur
-            blurred_img = upscaled_img.filter(ImageFilter.GaussianBlur(radius=1))
-
-            # Create a white background (500x150)
-            background = Image.new("L", (500, 150), color=255)
-
-            # Calculate top-left corner to paste the image centered
-            bg_w, bg_h = background.size
-            img_w, img_h = blurred_img.size
-            offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
-
-            # Paste the blurred image onto the background
-            background.paste(blurred_img, offset)
-            return background
-        
-        # if there is red, use filter for red, else use filter for white
-        img = filter_for_red(img) if contains_color(img, (190, 91, 65), 15) else filter_for_white(img)
-        img = upscale_image(img)
-        img.save(f"data/img{counter}.png")
-        with tesserocr.PyTessBaseAPI(path=tess_path, psm=10, oem=3) as api:
-            api.SetVariable("tessedit_char_whitelist", "0123456789")
-            api.SetImage(img)
-            text = api.GetUTF8Text()
-        text.replace("\n", "").strip()
-        if (len(text) == 0):
-            return 0
-        return int(text)
-
-    def make_cost_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
+    def make_sample_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
         w = 40
         h1 = 55
         h2 = -30
@@ -155,17 +105,13 @@ def read_tech(img: Image) -> dict:
     locked_tech_color = (108, 168, 242)
     tech_data = []
     for i, center in enumerate(centers):
-        box = make_cost_box(center)
+        box = make_sample_box(center)
         cropped_img = img.crop(box=box)
         has_tech = contains_color(cropped_img, target_rgb=has_tech_color, tolerance=20)
         locked_tech = not contains_color(cropped_img, target_rgb=locked_tech_color, tolerance=20)
         tech_type = get_tech_type(has_tech, locked_tech)
-        cost = 0
-        if (tech_type == "available"):
-            cost = get_tech_cost(cropped_img, i)
-        cropped_img.save(f"data/images/tech_tree/node_{i}.png")
         # print(f"node: {i:02d} | {tech_type} | {cost} | {get_tech_tier(i)}")
-        tech_data.append({"status": tech_type, "cost": cost, "center": centers[i]})
+        tech_data.append({"status": tech_type, "cost": 0, "center": centers[i]})
     
     tech_data = calc_tech_cost(tech_data)
     tech_dict = {}
