@@ -1,5 +1,5 @@
 import os
-from PIL import Image
+from PIL import Image, ImageFilter
 import tesserocr
 import numpy as np
 
@@ -44,22 +44,6 @@ def read_tech(img: Image) -> None:
     def make_full_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
         r = 60
         return (center[0] - r, center[1] - r, center[0] + r, center[1] + r)
-    
-    def filter_for_red(img: Image) -> Image:
-        img = img.convert("RGB")
-        data = np.array(img)
-        mask = (data[..., 0] >= 120) & (data[..., 1] < 110) & (data[..., 2] < 110)
-        data[mask] = [0, 0, 0]  # Black
-        data[~mask] = [255, 255, 255]  # White
-        return Image.fromarray(data)
-    
-    def filter_for_white(img: Image) -> Image:
-        img = img.convert("RGB")
-        data = np.array(img)
-        mask = (data[..., 0] > 150) & (data[..., 1] > 160) & (data[..., 2] > 170)
-        data[mask] = [0, 0, 0]  # Black
-        data[~mask] = [255, 255, 255]  # White
-        return Image.fromarray(data)
 
     def get_tech_type(has_tech: bool, locked_tech: bool) -> str:
         if (has_tech == True):
@@ -67,33 +51,62 @@ def read_tech(img: Image) -> None:
         if (locked_tech == True):
             return "locked"
         return "available"
-
-    def filter_tech_image(tech_type: str, img: Image) -> Image:
-        box = (0, 76, 99, 103)
-        match tech_type:
-            case "locked":
-                return img
-            case "owned":
-                return img.crop(box)
-            case "available":
-                return img.crop(box)
     
     def get_tech_cost(img: Image, counter: int) -> str:
-        box = (0, 0, 99, 22)
-        img = img.crop(box)
-        # if there is red
+        def filter_for_red(img: Image) -> Image:
+            img = img.convert("RGB")
+            data = np.array(img)
+            mask = (data[..., 0] >= 110) & (data[..., 1] < 110) & (data[..., 2] < 110)
+            data[mask] = [0, 0, 0]  # Black
+            data[~mask] = [255, 255, 255]  # White
+            return Image.fromarray(data)
+        
+        def filter_for_white(img: Image) -> Image:
+            img = img.convert("RGB")
+            data = np.array(img)
+            mask = (data[..., 0] > 150) & (data[..., 1] > 160) & (data[..., 2] > 170)
+            data[mask] = [0, 0, 0]  # Black
+            data[~mask] = [255, 255, 255]  # White
+            return Image.fromarray(data)
+        
+        def upscale_image(img: Image) -> Image:
+            arr = np.array(img)
+            # Upscale: 3x by repeating pixels
+            scale_factor = 3
+            upscaled_arr = arr.repeat(scale_factor, axis=0).repeat(scale_factor, axis=1)
+            upscaled_img = Image.fromarray(upscaled_arr)
+
+            # Apply slight Gaussian blur
+            blurred_img = upscaled_img.filter(ImageFilter.GaussianBlur(radius=1))
+
+            # Create a white background (500x150)
+            background = Image.new("L", (500, 150), color=255)
+
+            # Calculate top-left corner to paste the image centered
+            bg_w, bg_h = background.size
+            img_w, img_h = blurred_img.size
+            offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+
+            # Paste the blurred image onto the background
+            background.paste(blurred_img, offset)
+            return background
+        
+        # if there is red, use filter for red, else use filter for white
         img = filter_for_red(img) if contains_color(img, (190, 91, 65), 15) else filter_for_white(img)
+        img = upscale_image(img)
         img.save(f"data/img{counter}.png")
-        with tesserocr.PyTessBaseAPI(path=tess_path) as api:
+        with tesserocr.PyTessBaseAPI(path=tess_path, psm=10, oem=3) as api:
+            api.SetVariable("tessedit_char_whitelist", "0123456789")
             api.SetImage(img)
             text = api.GetUTF8Text()
-        return text
+        return text.replace("\n", "")
 
-    def make_text_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
-        w = 50
+    def make_cost_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
+        w = 40
         h1 = 55
-        h2 = 50
+        h2 = -30
         return (center[0] - w, center[1] - h1, center[0] + w, center[1] + h2)
+    
     centers = [
         # Tier 1: Riding -> Hunting
         (1582, 683),
@@ -126,21 +139,17 @@ def read_tech(img: Image) -> None:
         (1048, 738),
         (1290, 418)
     ]
+
     has_tech_color = (130, 207, 113)
     locked_tech_color = (108, 168, 242)
     for i, center in enumerate(centers):
-        box = make_text_box(center)
+        box = make_cost_box(center)
         cropped_img = img.crop(box=box)
         has_tech = contains_color(cropped_img, target_rgb=has_tech_color, tolerance=20)
         locked_tech = not contains_color(cropped_img, target_rgb=locked_tech_color, tolerance=20)
         tech_type = get_tech_type(has_tech, locked_tech)
-        filtered_img = filter_tech_image(tech_type, cropped_img).convert("RGB")
-        with tesserocr.PyTessBaseAPI(path=tess_path) as api:
-            api.SetImage(filtered_img)
-            text = api.GetUTF8Text()
-        text = text.replace("\n", "")
-        filtered_img.save(f"data/images/tech_tree/node_{i}.png")
         cost = "."
         if (tech_type == "available"):
             cost = get_tech_cost(cropped_img, i)
-        print(f"node: {i:02d} | {text} | {tech_type} | {cost}")
+        cropped_img.save(f"data/images/tech_tree/node_{i}.png")
+        print(f"node: {i:02d} | {tech_type} | {cost}")
