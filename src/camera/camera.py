@@ -39,7 +39,7 @@ def tech_info_camera(tech_name: str):
     tech_position = tech_tree[tech_name]["center"]
     pyautogui.moveTo(tech_position[0] // 2, (tech_position[1] + 132) // 2)
     pyautogui.click(button="left")
-    time.sleep(0.1)
+    time.sleep(0.3)
 
 def focus_application(app_name):
     try:
