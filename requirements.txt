@@ -3,3 +3,4 @@ pyobjc
 pyautogui
 pytesseract
 numpy
+tesserocr
