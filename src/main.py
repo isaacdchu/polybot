@@ -16,6 +16,9 @@ print(reader.get_screenshot_text(img))
 print(reader.get_screenshot_type(img))
 reader.read_screenshot(img, "tech")
 
+camera.tech_info_camera("navigation")
+img = screenshot.take_screenshot("tt")
+
 # img = Image.open("data/img10.png")
 # with tesserocr.PyTessBaseAPI(path=tess_path, psm=10, oem=3) as api:
 #     api.SetVariable("tessedit_char_whitelist", "0123456789")

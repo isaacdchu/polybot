@@ -1,6 +1,7 @@
 import subprocess as subp
 import pyautogui
 import time
+import json
 
 def center_camera():
     focus_application("Polytopia")
@@ -20,6 +21,19 @@ def tech_tree_camera():
     pyautogui.press("2")
     pyautogui.press("3")
     pyautogui.moveTo(300, 790)
+
+def tech_info_camera(tech_name: str):
+    focus_application("Polytopia")
+    pyautogui.press("2")
+    pyautogui.press("2")
+    pyautogui.press("3")
+    with open("data/game_state/tech_tree.json", "r") as file:
+        tech_tree = json.load(file)
+
+    tech_position = tech_tree[tech_name]["center"]
+    pyautogui.moveTo(tech_position[0] // 2, (tech_position[1] + 132) // 2)
+    pyautogui.click(button="left")
+    time.sleep(0.1)
 
 def focus_application(app_name):
     try:
