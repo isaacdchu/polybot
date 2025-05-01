@@ -5,6 +5,8 @@ import json
 
 def center_camera():
     focus_application("Polytopia")
+    pyautogui.press("escape")
+    pyautogui.press("escape")
     pyautogui.press("2")
     pyautogui.press("2")
     (screen_width, screen_height) = pyautogui.size()
@@ -18,12 +20,16 @@ def center_camera():
 
 def tech_tree_camera():
     focus_application("Polytopia")
+    pyautogui.press("escape")
+    pyautogui.press("escape")
     pyautogui.press("2")
     pyautogui.press("3")
     pyautogui.moveTo(300, 790)
 
 def tech_info_camera(tech_name: str):
     focus_application("Polytopia")
+    pyautogui.press("escape")
+    pyautogui.press("escape")
     pyautogui.press("2")
     pyautogui.press("2")
     pyautogui.press("3")
