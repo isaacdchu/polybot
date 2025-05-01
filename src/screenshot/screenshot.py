@@ -8,7 +8,7 @@ from Quartz import (
     CGImageGetBytesPerRow
 )
 
-def take_screenshot(name: str) -> Image:
+def take_screenshot(path: str) -> Image:
     """
     - Description:
     - Takes a screenshot of the game's window (3024px x 1692px)
@@ -22,7 +22,7 @@ def take_screenshot(name: str) -> Image:
     img = capture_window(get_window_id("Polytopia"))
     box = (0, 132, 3024, 1824)
     img = img.crop(box=box)
-    img.save(os.path.join("data", f"{name}.png"))
+    img.save(path)
     return img
 
 def get_window_id(title):
