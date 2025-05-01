@@ -2,6 +2,9 @@ import os
 from PIL import Image, ImageFilter
 import tesserocr
 import numpy as np
+from math import ceil
+import json
+
 
 tess_path = "/opt/homebrew/Cellar/tesseract/5.5.0_1/share/tessdata"
 
@@ -20,7 +23,11 @@ def get_screenshot_type(img: Image) -> str:
 def read_screenshot(img: Image, type: str) -> None:
     match type:
         case "tech":
-            read_tech(img)
+            tech_dict = read_tech(img)
+            rel_output_path = os.path.join("data", "game_state", "tech_tree.json")
+            abs_output_path = os.path.realpath(rel_output_path)
+            with open(abs_output_path, "w") as f:
+                json.dump(tech_dict, f, indent=4)
         case "info":
             return
         case "game":
@@ -40,10 +47,65 @@ def contains_color(img: Image, target_rgb=tuple[int, int, int], tolerance=20):
     diff = np.linalg.norm(data - target_rgb, axis=2)
     return np.any(diff <= tolerance)
 
-def read_tech(img: Image) -> None:
+def read_tech(img: Image) -> dict:
+    # array for going from index to name
+    tech_name_map = [
+        "riding",
+        "organization",
+        "climbing",
+        "fishing",
+        "hunting",
+        "roads",
+        "free_spirit",
+        "farming",
+        "strategy",
+        "mining",
+        "meditation",
+        "sailing",
+        "ramming",
+        "archery",
+        "forestry",
+        "trade",
+        "chivalry",
+        "construction",
+        "diplomacy",
+        "smithery",
+        "philosophy",
+        "navigation",
+        "aquatism",
+        "spiritualism",
+        "mathematics"
+    ]
+
     def make_full_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
         r = 60
         return (center[0] - r, center[1] - r, center[0] + r, center[1] + r)
+    
+    def calc_tech_cost(k: list[dict]) -> list[dict]:
+        # cost of tech = (tier * cities + 4)
+        # literacy = ceil(cost / 3)
+        def find_num_cities(has_literacy: bool, k: list[dict]) -> int:
+            city_data = []
+            for i, item in enumerate(k):
+                if (item["cost"] > 0):
+                    cost = (item["cost"] - 4) / get_tech_tier(i)
+                    if (has_literacy == True):
+                        cost = ceil(cost / 3)
+                    city_data.append(int(cost))
+            most_common = max(set(city_data), key=city_data.count)
+            return most_common
+
+        has_literacy = False
+        if (k[20]["status"] == "owned"):
+            has_literacy = True
+
+        num_cities = find_num_cities(has_literacy, k)
+        for i in range(len(k)):
+            cost = get_tech_tier(i) * num_cities + 4
+            if (has_literacy == True):
+                cost = ceil(cost / 3)
+            k[i]["cost"] = cost
+        return k
 
     def get_tech_type(has_tech: bool, locked_tech: bool) -> str:
         if (has_tech == True):
@@ -52,7 +114,14 @@ def read_tech(img: Image) -> None:
             return "locked"
         return "available"
     
-    def get_tech_cost(img: Image, counter: int) -> str:
+    def get_tech_tier(index: int) -> int:
+        if (index <= 4):
+            return 1
+        if (index <= 14):
+            return 2
+        return 3
+    
+    def get_tech_cost(img: Image, counter: int) -> int:
         def filter_for_red(img: Image) -> Image:
             img = img.convert("RGB")
             data = np.array(img)
@@ -99,7 +168,10 @@ def read_tech(img: Image) -> None:
             api.SetVariable("tessedit_char_whitelist", "0123456789")
             api.SetImage(img)
             text = api.GetUTF8Text()
-        return text.replace("\n", "")
+        text.replace("\n", "").strip()
+        if (len(text) == 0):
+            return 0
+        return int(text)
 
     def make_cost_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
         w = 40
@@ -142,14 +214,22 @@ def read_tech(img: Image) -> None:
 
     has_tech_color = (130, 207, 113)
     locked_tech_color = (108, 168, 242)
+    tech_data = []
     for i, center in enumerate(centers):
         box = make_cost_box(center)
         cropped_img = img.crop(box=box)
         has_tech = contains_color(cropped_img, target_rgb=has_tech_color, tolerance=20)
         locked_tech = not contains_color(cropped_img, target_rgb=locked_tech_color, tolerance=20)
         tech_type = get_tech_type(has_tech, locked_tech)
-        cost = "."
+        cost = 0
         if (tech_type == "available"):
             cost = get_tech_cost(cropped_img, i)
         cropped_img.save(f"data/images/tech_tree/node_{i}.png")
-        print(f"node: {i:02d} | {tech_type} | {cost}")
+        # print(f"node: {i:02d} | {tech_type} | {cost} | {get_tech_tier(i)}")
+        tech_data.append({"status": tech_type, "cost": cost})
+    
+    tech_data = calc_tech_cost(tech_data)
+    tech_dict = {}
+    for i, tech_name in enumerate(tech_name_map):
+        tech_dict[tech_name] = tech_data[i]
+    return tech_dict
