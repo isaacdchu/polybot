@@ -41,7 +41,7 @@ def get_screenshot_text(img: Image) -> str:
     text = text.replace("\n", "")
     return text
 
-def contains_color(img: Image, target_rgb=tuple[int, int, int], tolerance=20):
+def contains_color(img: Image, target_rgb=tuple[int, int, int], tolerance=20) -> bool:
     img = img.convert('RGB')
     data = np.array(img)
     diff = np.linalg.norm(data - target_rgb, axis=2)
@@ -53,11 +53,13 @@ def read_tech(img: Image) -> dict:
         # literacy = ceil(2 * cost / 3)
         def find_num_cities(has_literacy: bool) -> int:
             with tesserocr.PyTessBaseAPI(path=tess_path, psm=10, oem=3) as api:
-                box = (1679, 684, 1734, 708)
+                box = (1702, 687, 1738, 705)
                 img = Image.open("data/images/tech_tree/tt.png").crop(box=box).convert("RGB")
                 api.SetVariable("tessedit_char_whitelist", "0123456789")
                 api.SetImage(img)
+                img.save("data/test.png")
                 tier_3_cost = int(api.GetUTF8Text().replace("\n", "").strip())
+                print(tier_3_cost)
             if (has_literacy == True):
                 num_cities = (1.5 * tier_3_cost - 4) // 3
             else:
