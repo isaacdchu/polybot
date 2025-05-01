@@ -48,39 +48,6 @@ def contains_color(img: Image, target_rgb=tuple[int, int, int], tolerance=20):
     return np.any(diff <= tolerance)
 
 def read_tech(img: Image) -> dict:
-    # array for going from index to name
-    tech_name_map = [
-        "riding",
-        "organization",
-        "climbing",
-        "fishing",
-        "hunting",
-        "roads",
-        "free_spirit",
-        "farming",
-        "strategy",
-        "mining",
-        "meditation",
-        "sailing",
-        "ramming",
-        "archery",
-        "forestry",
-        "trade",
-        "chivalry",
-        "construction",
-        "diplomacy",
-        "smithery",
-        "philosophy",
-        "navigation",
-        "aquatism",
-        "spiritualism",
-        "mathematics"
-    ]
-
-    def make_full_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
-        r = 60
-        return (center[0] - r, center[1] - r, center[0] + r, center[1] + r)
-    
     def calc_tech_cost(k: list[dict]) -> list[dict]:
         # cost of tech = (tier * cities + 4)
         # literacy = ceil(cost / 3)
@@ -179,38 +146,10 @@ def read_tech(img: Image) -> dict:
         h2 = -30
         return (center[0] - w, center[1] - h1, center[0] + w, center[1] + h2)
     
-    centers = [
-        # Tier 1: Riding -> Hunting
-        (1582, 683),
-        (1697, 849),
-        (1579, 1009),
-        (1388, 944),
-        (1391, 741),
-
-        # Tier 2: Roads -> Forestry
-        (1533, 522),
-        (1721, 587),
-        (1836, 752),
-        (1833, 952),
-        (1712, 1114),
-        (1520, 1171),
-        (1330, 1106),
-        (1216, 941),
-        (1220, 741),
-        (1340, 580),
-
-        #Tier 3: Trade -> Mathematics
-        (1481, 359),
-        (1861, 490),
-        (1976, 654),
-        (1968, 1055),
-        (1848, 1215),
-        (1465, 1332),
-        (1273, 1266),
-        (1045, 938),
-        (1048, 738),
-        (1290, 418)
-    ]
+    with open("data/game_state/tech_tree.json", "r") as f:
+        data = json.load(f)
+        centers = [data[item]["center"] for item in data]
+        tech_names = [item for item in data]
 
     has_tech_color = (130, 207, 113)
     locked_tech_color = (108, 168, 242)
@@ -230,6 +169,6 @@ def read_tech(img: Image) -> dict:
     
     tech_data = calc_tech_cost(tech_data)
     tech_dict = {}
-    for i, tech_name in enumerate(tech_name_map):
+    for i, tech_name in enumerate(tech_names):
         tech_dict[tech_name] = tech_data[i]
     return tech_dict
