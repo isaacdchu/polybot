@@ -31,6 +31,23 @@ def contains_color(img: Image, target_rgb=tuple[int, int, int], tolerance=20):
     diff = np.linalg.norm(data - target_rgb, axis=2)
     return np.any(diff <= tolerance)
 
+def get_tech_type(has_tech: bool, locked_tech: bool) -> str:
+    if (has_tech == True and locked_tech == True):
+        return "owned"
+    if (locked_tech == True):
+        return "locked"
+    return "available"
+
+def filter_tech_image(tech_type: str, img: Image) -> Image:
+    box = (0, 36, 99, 69)
+    match tech_type:
+        case "locked":
+            return img
+        case "owned":
+            return img.crop(box)
+        case "available":
+            return img.crop(box)
+
 def read_tech(img: Image) -> None:
     def make_full_box(center: tuple[int, int]) -> tuple[int, int, int, int]:
         r = 60
@@ -73,16 +90,15 @@ def read_tech(img: Image) -> None:
         (1290, 418)
     ]
     has_tech_color = (130, 207, 113)
+    locked_tech_color = (108, 168, 242)
     for i, center in enumerate(centers):
         box = make_text_box(center)
         cropped_img = img.crop(box=box)
-        # TODO need more preprocessing before converting to string
-        text = pytesseract.image_to_string(cropped_img)
-        text = text.replace("\n", "")
         has_tech = contains_color(cropped_img, target_rgb=has_tech_color, tolerance=20)
-        # if (has_tech == True):
-            # add to tech upgraded
-
-        # TODO else: check for blue for available upgrade, then if no blue, add to locked tech
-        cropped_img.save(f"data/node_{i}.png")
+        locked_tech = not contains_color(cropped_img, target_rgb=locked_tech_color, tolerance=20)
+        tech_type = get_tech_type(has_tech, locked_tech)
+        filtered_img = filter_tech_image(tech_type, cropped_img)
+        text = pytesseract.image_to_string(filtered_img)
+        text = text.replace("\n", "")
+        filtered_img.save(f"data/node_{i}.png")
         print(f"node: {i:02d} | {text}")
