@@ -226,7 +226,7 @@ def read_tech(img: Image) -> dict:
             cost = get_tech_cost(cropped_img, i)
         cropped_img.save(f"data/images/tech_tree/node_{i}.png")
         # print(f"node: {i:02d} | {tech_type} | {cost} | {get_tech_tier(i)}")
-        tech_data.append({"status": tech_type, "cost": cost})
+        tech_data.append({"status": tech_type, "cost": cost, "center": centers[i]})
     
     tech_data = calc_tech_cost(tech_data)
     tech_dict = {}
