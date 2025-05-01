@@ -13,6 +13,7 @@ def get_screenshot_type(img: Image) -> str:
     keywords = {
         "costs increase for": "tech",
         "(v]": "info",
+        "[v)": "info",
         "settings": "game"
     }
     for key, value in keywords.items():
@@ -29,7 +30,7 @@ def read_screenshot(img: Image, type: str) -> None:
             with open(abs_output_path, "w") as f:
                 json.dump(tech_dict, f, indent=4)
         case "info":
-            return
+            read_info(img)
         case "game":
             return
 
@@ -46,6 +47,13 @@ def contains_color(img: Image, target_rgb=tuple[int, int, int], tolerance=20) ->
     data = np.array(img)
     diff = np.linalg.norm(data - target_rgb, axis=2)
     return np.any(diff <= tolerance)
+
+def read_info(img: Image) -> dict:
+    box = (146, 1530, 482, 1637)
+    img = img.crop(box=box)
+    img.save("data/images/game/info.png")
+    print(get_screenshot_text(img))
+    return {}
 
 def read_tech(img: Image) -> dict:
     def calc_tech_cost(k: list[dict]) -> list[dict]:
