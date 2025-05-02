@@ -61,7 +61,7 @@ def read_tech(img: Image) -> dict:
         # literacy = ceil(2 * cost / 3)
         def find_num_cities(has_literacy: bool) -> int:
             with tesserocr.PyTessBaseAPI(path=tess_path, psm=10, oem=3) as api:
-                box = (1702, 687, 1738, 705)
+                box = (1709, 724, 1738, 742)
                 img = Image.open("data/images/tech_tree/tt.png").crop(box=box).convert("RGB")
                 api.SetVariable("tessedit_char_whitelist", "0123456789")
                 api.SetImage(img)
