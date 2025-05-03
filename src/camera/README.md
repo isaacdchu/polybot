@@ -15,3 +15,11 @@ tech_tree_camera()
     - None
 - Return:
     - None
+tech_info_camera(tech_name: str)
+- Description:
+    - Sets the camera to view a specified technology in the tech tree
+- Parameters:
+    - tech_name: str
+        - The name of the technology to focus on
+- Return:
+    - None
