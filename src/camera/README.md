@@ -23,3 +23,11 @@ tech_info_camera(tech_name: str)
         - The name of the technology to focus on
 - Return:
     - None
+reset_camera()
+- Description:
+    - Brings camera back to view the game board, with nothing selected
+    - Does not move the mouse
+- Parameters:
+    - None
+- Return:
+    - None

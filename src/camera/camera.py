@@ -41,6 +41,14 @@ def tech_info_camera(tech_name: str):
     pyautogui.click(button="left")
     time.sleep(0.2)
 
+def reset_camera():
+    focus_application("Polytopia")
+    pyautogui.press("escape")
+    pyautogui.press("escape")
+    pyautogui.press("2")
+    pyautogui.press("2")
+    time.sleep(0.1)
+
 def focus_application(app_name):
     try:
         # Use AppleScript to bring the application to the front
@@ -50,9 +58,9 @@ def focus_application(app_name):
         end tell
         '''
         subp.run(["osascript", "-e", script], check=True)
-        print(f"Focused on application: {app_name}")
     except subp.CalledProcessError as e:
         print(f"Failed to focus on application: {app_name}. Error: {e}")
+        raise RuntimeError
 
 def move_cursor_to_center():
     (screen_width, screen_height) = pyautogui.size()
