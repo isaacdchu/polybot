@@ -1,7 +1,9 @@
 import subprocess as subp
+import numpy as np
 import pyautogui
 import time
 import json
+
 
 def center_camera():
     focus_application("Polytopia")
@@ -48,6 +50,22 @@ def reset_camera():
     pyautogui.press("2")
     pyautogui.press("2")
     time.sleep(0.1)
+
+def tile_camera(x: int, y: int):
+    # check bounds
+    if (x < 0 or x > 10 or y < 0 or y > 10):
+        print(f"Tile coordinates out of bounds: ({x}, {y})")
+        raise IndexError
+    focus_application("Polytopia")
+    raw_coords = np.array([x, y])
+    translation = np.array([1487, 1345])
+    transformation = np.array([[83.529412, -83.6765], [-48.470588, -50.6765]])
+    coords = np.matmul(transformation, raw_coords.T) + translation
+    coords = coords.astype(int)
+    # rescale to screen size, which has half the resolution on x and y
+    coords[0] = (coords[0] >> 1) + 3
+    coords[1] = (coords[1] >> 1) + 66
+    pyautogui.moveTo(coords[0], coords[1])
 
 def focus_application(app_name):
     try:

@@ -8,7 +8,10 @@ import numpy as np
 
 tess_path = "/opt/homebrew/Cellar/tesseract/5.5.0_1/share/tessdata"
 
-camera.reset_camera()
+camera.center_camera()
+for i in range(0, 11):
+    for j in range(0, 11):
+        camera.tile_camera(i, j)
 
 # camera.center_camera()
 # img = screenshot.take_screenshot("data/images/game/ss.png")

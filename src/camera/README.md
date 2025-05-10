@@ -31,3 +31,14 @@ reset_camera()
     - None
 - Return:
     - None
+tile_camera(x: int, y: int)
+- Description:
+    - Clicks on the specified tile in x-y coordinates (0 indexed)
+    - Only clicks once
+- Paramters:
+    - x: int
+        - The x-coordinate of the tile (low x = bottom left of screen)
+    - y: int
+        - The y-coordinate of the itle (low y = top left of screen)
+- Return:
+    - None
