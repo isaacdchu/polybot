@@ -1,20 +1,13 @@
 # Reader
 ## Methods
-get_screenshot_type(img: Image)
-- Description:
-    - Reads an image and outputs what type of image it is
-- Parameters:
-    - img: Image
-        - The Image object to read
-- Return:
-    - A string describing what information the screenshot has (used for read_screenshot)
-read_screenshot(img: Image, type: str)
+read_screenshot(img: Image, type: str = None)
 - Description:
     - Reads an image and outputs data about what it sees
 - Parameters:
     - img: Image
         - The Image object to read
-    - type: str
-        - The type of screenshot (game, tech, info, etc.)
+        - Automatically detects what type of image the screenshot is
+    - type: str = None
+        - Optional parameter that can force the method to read the image a given type
 - Return:
     - A JSON file of data 

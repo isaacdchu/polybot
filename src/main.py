@@ -5,13 +5,30 @@ import camera.camera as camera
 from PIL import Image, ImageFilter
 import tesserocr
 import numpy as np
+import pyautogui
+import json
+import time
 
 tess_path = "/opt/homebrew/Cellar/tesseract/5.5.0_1/share/tessdata"
 
 camera.center_camera()
+tiles = {}
 for i in range(0, 11):
     for j in range(0, 11):
         camera.tile_camera(i, j)
+        pyautogui.click(button="left")
+        time.sleep(0.1)
+        img = screenshot.take_screenshot("data/images/game/ss.png")
+        if (reader.detect_unit(img) == True):
+            pyautogui.click(button="left")
+            time.sleep(0.1)
+            img = screenshot.take_screenshot("data/images/game/ss.png")
+        tile = reader.read_screenshot(img, "info")
+        tiles[f"{i}, {j}"] = tile
+        pyautogui.press("2")
+        pyautogui.press("2")
+with open("data/game_state/tiles.json", "w") as file:
+    json.dump(tiles, file, indent=4)
 
 # camera.center_camera()
 # img = screenshot.take_screenshot("data/images/game/ss.png")
