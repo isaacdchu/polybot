@@ -13,10 +13,6 @@ for i in range(0, 11):
     for j in range(0, 11):
         camera.tile_camera(i, j)
 
-# test
-def print_4_numbers():
-    pass
-
 # camera.center_camera()
 # img = screenshot.take_screenshot("data/images/game/ss.png")
 # img = Image.open("data/images/game/ss.png")
