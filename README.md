@@ -1,5 +1,6 @@
 # Polybot
 An AI bot that plays polytopia (steam version on mac)
+Project currently on hold until I find a more efficient/practical way to read game state
 
 ## Settings
 Suggestions: OFF
